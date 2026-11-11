@@ -280,24 +280,13 @@ h1,h2,h3{font-family:Archivo,Inter,sans-serif;color:var(--ink);line-height:1.08;
 .hero-grid{grid-template-columns:1fr 1fr}
 .hero-media{position:relative;min-width:0}
 .vsl{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid rgba(217,178,95,.45);box-shadow:0 40px 90px rgba(0,0,0,.6)}
-.vsl video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
-.vsl-play{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;gap:14px;padding:20px;border:0;cursor:pointer;color:var(--ink);text-align:left;font:inherit;background:linear-gradient(180deg,rgba(7,7,10,.05) 40%,rgba(7,7,10,.8))}
-.vsl-play .ico{flex:none;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#0b0b0e;box-shadow:0 10px 30px rgba(217,178,95,.45);transition:transform .2s}
-.vsl-play .ico svg{width:30px;height:30px;margin-left:3px}
-.vsl-play:hover .ico{transform:scale(1.07)}
-.vsl-play:focus-visible{outline:2px solid var(--gold);outline-offset:-4px}
-.vsl-play .txt{font:800 19px/1.15 Archivo;padding-bottom:10px}
-.vsl-play .txt small{display:block;font:500 13px/1.3 inherit;color:var(--body);margin-top:4px}
-.vsl.on .vsl-play{display:none}
+.vsl iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .hero-media .goal{position:static;margin-top:18px}
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr}
   .hero-media{order:-1}
   .vsl{border-radius:16px}
-  .vsl-play{padding:14px}
-  .vsl-play .ico{width:54px;height:54px}
-  .vsl-play .txt{font-size:17px;padding-bottom:6px}
   .board{padding:24px 18px}
   .board-head{grid-template-columns:1fr;gap:22px}
   .rules{grid-template-columns:1fr}
@@ -348,15 +337,9 @@ h1,h2,h3{font-family:Archivo,Inter,sans-serif;color:var(--ink);line-height:1.08;
       </div>
 
       <div class="reveal hero-media">
-        <!-- Vídeo del reto (11-11-2026). Original 1080p en Drive; aquí va la versión web 720p. -->
-        <div class="vsl" id="vsl">
-          <video id="vslVideo" playsinline preload="none" poster="assets/reto-video-poster.jpg">
-            <source src="assets/reto-video.mp4" type="video/mp4">
-          </video>
-          <button class="vsl-play" id="vslPlay" type="button" aria-label="Reproducir el video del reto">
-            <span class="ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
-            <span class="txt">Mira el video <small>3 min · con sonido</small></span>
-          </button>
+        <!-- Vídeo del reto (11-11-2026) · Bunny Stream, colección «Valenzuela». Original 1080p en Drive. -->
+        <div class="vsl">
+          <iframe src="https://iframe.mediadelivery.net/embed/779343/4dca9254-7526-4982-9c95-112b75e6a5ed?autoplay=false&loop=false&muted=false&preload=true&responsive=true" title="Video del reto de $100 a $1,000 · Alfredo Valenzuela" loading="eager" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen" allowfullscreen></iframe>
         </div>
         <!-- Mini-marcador: sale de RETO (script). -->
         <div class="goal">
@@ -797,26 +780,6 @@ if (TS_PIXEL.enabled && TS_PIXEL.id) {
     num.textContent = pad(Math.floor(left/3600)) + ':' + pad(Math.floor(left%3600/60)) + ':' + pad(left%60);
   }
   tick(); setInterval(tick, 1000);
-})();
-
-/* Vídeo del reto: el botón dorado lo arranca con sonido y deja los controles nativos */
-(function(){
-  var box = document.getElementById('vsl'), v = document.getElementById('vslVideo'), b = document.getElementById('vslPlay');
-  if (!box || !v || !b) return;
-  var sent = {};
-  b.addEventListener('click', function(){
-    box.classList.add('on');
-    v.controls = true;
-    var p = v.play();
-    if (p && p.catch) p.catch(function(){});
-    beacon('video_play');
-  });
-  v.addEventListener('timeupdate', function(){
-    if (!v.duration) return;
-    var q = Math.floor(v.currentTime / v.duration * 4) * 25;
-    if (q >= 25 && q < 100 && !sent[q]) { sent[q] = 1; beacon('video_' + q); }
-  });
-  v.addEventListener('ended', function(){ beacon('video_100'); });
 })();
 
 /* Aparición suave al hacer scroll */
