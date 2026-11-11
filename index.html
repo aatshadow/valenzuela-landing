@@ -280,13 +280,32 @@ h1,h2,h3{font-family:Archivo,Inter,sans-serif;color:var(--ink);line-height:1.08;
 .hero-grid{grid-template-columns:1fr 1fr}
 .hero-media{position:relative;min-width:0}
 .vsl{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid rgba(217,178,95,.45);box-shadow:0 40px 90px rgba(0,0,0,.6)}
-.vsl iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vsl video{display:block;width:100%;height:100%;object-fit:cover;background:#000;cursor:pointer}
+.vsl video::-webkit-media-controls{display:none!important}
+.vsl-sound{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;border:0;cursor:pointer;color:#fff;text-align:center;font:inherit;background:rgba(7,7,10,.45)}
+.vsl-sound .ico{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#0b0b0e;margin-bottom:8px;animation:vslPulse 1.6s ease-out infinite}
+.vsl-sound .ico svg{width:46px;height:46px}
+.vsl-sound .t1{font:600 14px/1.2 inherit;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.vsl-sound .t2{font:900 clamp(22px,2.6vw,32px)/1.1 Archivo;letter-spacing:-.01em;text-transform:uppercase;text-shadow:0 2px 18px rgba(0,0,0,.7);max-width:12em}
+.vsl-sound:focus-visible{outline:2px solid var(--gold);outline-offset:-4px}
+@keyframes vslPulse{0%{box-shadow:0 0 0 0 rgba(217,178,95,.65)}100%{box-shadow:0 0 0 26px rgba(217,178,95,0)}}
+.vsl.on .vsl-sound{display:none}
+.vsl-paused{position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,7,10,.4);pointer-events:none}
+.vsl-paused[hidden]{display:none}
+.vsl-paused span{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#0b0b0e}
+.vsl-paused svg{width:40px;height:40px;margin-left:4px}
+.vsl-bar{position:absolute;left:0;right:0;bottom:0;height:6px;background:rgba(255,255,255,.18);pointer-events:none}
+.vsl-bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s linear}
+@media (prefers-reduced-motion:reduce){.vsl-sound .ico{animation:none}}
 .hero-media .goal{position:static;margin-top:18px}
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr}
   .hero-media{order:-1}
   .vsl{border-radius:16px}
+  .vsl-sound .ico{width:72px;height:72px}.vsl-sound .ico svg{width:36px;height:36px}
+  .vsl-sound .t2{font-size:21px}
+  .vsl-sound .t1{font-size:12px}
   .board{padding:24px 18px}
   .board-head{grid-template-columns:1fr;gap:22px}
   .rules{grid-template-columns:1fr}
@@ -337,9 +356,17 @@ h1,h2,h3{font-family:Archivo,Inter,sans-serif;color:var(--ink);line-height:1.08;
       </div>
 
       <div class="reveal hero-media">
-        <!-- Vídeo del reto (11-11-2026) · Bunny Stream, colección «Valenzuela». Original 1080p en Drive. -->
-        <div class="vsl">
-          <iframe src="https://iframe.mediadelivery.net/embed/779343/4dca9254-7526-4982-9c95-112b75e6a5ed?autoplay=false&loop=false&muted=false&preload=true&responsive=true" title="Video del reto de $100 a $1,000 · Alfredo Valenzuela" loading="eager" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen" allowfullscreen></iframe>
+        <!-- Vídeo del reto (11-11-2026) · Bunny Stream (biblioteca 779343, colección «Valenzuela»), reproductor propio:
+             arranca solo y en silencio, clic = desde el principio con sonido, sin controles ni tiempo, barra que frena. -->
+        <div class="vsl" id="vsl" data-hls="https://vz-22aefd06-e6b.b-cdn.net/4dca9254-7526-4982-9c95-112b75e6a5ed/playlist.m3u8" data-mp4="https://vz-22aefd06-e6b.b-cdn.net/4dca9254-7526-4982-9c95-112b75e6a5ed/play_720p.mp4">
+          <video id="vslVideo" muted autoplay playsinline webkit-playsinline preload="auto" poster="assets/reto-video-poster.jpg" disablepictureinpicture disableremoteplayback></video>
+          <button class="vsl-sound" id="vslSound" type="button" aria-label="Activar el sonido del video">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></span>
+            <span class="t1">Tu video ya empezó</span>
+            <span class="t2">Haz clic para activar el sonido</span>
+          </button>
+          <div class="vsl-paused" id="vslPaused" hidden><span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span></div>
+          <div class="vsl-bar" aria-hidden="true"><i id="vslBar"></i></div>
         </div>
         <!-- Mini-marcador: sale de RETO (script). -->
         <div class="goal">
@@ -780,6 +807,53 @@ if (TS_PIXEL.enabled && TS_PIXEL.id) {
     num.textContent = pad(Math.floor(left/3600)) + ':' + pad(Math.floor(left%3600/60)) + ':' + pad(left%60);
   }
   tick(); setInterval(tick, 1000);
+})();
+
+/* Vídeo del reto (Bunny Stream por HLS). Arranca solo y en silencio; el primer clic lo reinicia con sonido.
+   Sin controles ni tiempo. La barra no es lineal: corre al principio y frena hacia el final. */
+(function(){
+  var box = document.getElementById('vsl'), v = document.getElementById('vslVideo');
+  var snd = document.getElementById('vslSound'), paused = document.getElementById('vslPaused'), bar = document.getElementById('vslBar');
+  if (!box || !v) return;
+  var hlsUrl = box.getAttribute('data-hls'), mp4 = box.getAttribute('data-mp4'), on = false, sent = {};
+  function tryPlay(){ var p = v.play(); if (p && p.catch) p.catch(function(){}); }
+  function start(){
+    if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = hlsUrl; tryPlay(); return; }
+    var sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';
+    sc.onload = function(){
+      if (window.Hls && Hls.isSupported()) {
+        var h = new Hls({capLevelToPlayerSize:true, startLevel:-1});
+        h.on(Hls.Events.ERROR, function(e, d){ if (d && d.fatal) { h.destroy(); v.src = mp4; tryPlay(); } });
+        h.loadSource(hlsUrl); h.attachMedia(v);
+        h.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+      } else { v.src = mp4; tryPlay(); }
+    };
+    sc.onerror = function(){ v.src = mp4; tryPlay(); };
+    document.head.appendChild(sc);
+  }
+  v.loop = true;                       /* la vista previa en silencio da vueltas hasta que hacen clic */
+  snd.addEventListener('click', function(){
+    on = true; box.classList.add('on');
+    v.loop = false; v.muted = false; v.volume = 1;
+    try { v.currentTime = 0; } catch(e){}
+    bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = '';
+    tryPlay(); beacon('video_play');
+  });
+  v.addEventListener('click', function(){ if (!on) return; if (v.paused || v.ended) tryPlay(); else v.pause(); });
+  v.addEventListener('pause', function(){ if (on) paused.hidden = false; });
+  v.addEventListener('playing', function(){ paused.hidden = true; });
+  v.addEventListener('timeupdate', function(){
+    if (!v.duration) return;
+    var p = Math.min(1, v.currentTime / v.duration);
+    bar.style.width = ((1 - Math.pow(1 - p, 2.6)) * 100).toFixed(2) + '%';
+    if (!on) return;
+    var q = Math.floor(p * 4) * 25;
+    if (q >= 25 && q < 100 && !sent[q]) { sent[q] = 1; beacon('video_' + q); }
+  });
+  v.addEventListener('ended', function(){ if (on) { paused.hidden = false; beacon('video_100'); } });
+  v.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  start();
 })();
 
 /* Aparición suave al hacer scroll */
